@@ -1,13 +1,14 @@
 import os
+import json
 import hashlib
 import vt
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 
 class VirusTotalScanner:
 
-  def __init__(self, env_path="../../server/.env"):
-    config = dotenv_values(env_path)
-    self.API_KEY = config["VIRUS_TOTAL_API_KEY"]
+  def __init__(self, env_path="server/.env"):
+    # config = dotenv_values(env_path)
+    self.API_KEY = os.getenv("VIRUS_TOTAL_API_KEY")
 
     if not self.API_KEY:
       raise ValueError("VIRUS_TOTAL_API_KEY not found in .env")
@@ -29,13 +30,15 @@ class VirusTotalScanner:
 
       with vt.Client(apikey=self.API_KEY) as client:
         file_obj = client.get_object(f"/files/{file_hash}")
-
-        print("File:", file_obj.get("names", ["Unnamed"])[0])
-        print("SHA256:", file_obj.sha256)
-        print("Size:", file_obj.size, "bytes")
-        print("Malicious detections:", file_obj.last_analysis_stats["malicious"])
-        print("Suspicious detections:", file_obj.last_analysis_stats["suspicious"])
-        print("VT URL:", f"https://www.virustotal.com/gui/file/{file_obj.sha256}")
+        file_json = json.dumps({
+          "file": file_obj.get("names", ["unnamed"])[0],
+          "sHA256:": file_obj.sha256,
+          "size:": file_obj.size,
+          "malicious_detections:": file_obj.last_analysis_stats["malicious"],
+          "suspicious_detections:": file_obj.last_analysis_stats["suspicious"],
+          "vt_url": f"https://www.virustotal.com/gui/file/{file_obj.sha256}",
+        })
+        # print(file_json, flush=True)
 
     except vt.error.APIError as e:
       print(f"[!] File not found: {e}")

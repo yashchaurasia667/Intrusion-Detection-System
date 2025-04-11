@@ -3,7 +3,10 @@ const electron = require("electron");
 electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args) {
     const [channel, listener] = args;
-    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
+    return electron.ipcRenderer.on(
+      channel,
+      (event, ...args2) => listener(event, ...args2)
+    );
   },
   off(...args) {
     const [channel, ...omit] = args;
@@ -19,4 +22,9 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   }
   // You can expose other APTs you need here.
   // ...
+});
+electron.contextBridge.exposeInMainWorld("api", {
+  list: async () => await electron.ipcRenderer.invoke("list"),
+  openPath: (path) => electron.ipcRenderer.invoke("openPath", path),
+  addFolder: async () => await electron.ipcRenderer.invoke("addFolder")
 });
