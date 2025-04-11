@@ -29,4 +29,5 @@ contextBridge.exposeInMainWorld("api", {
   list: async () => await ipcRenderer.invoke("list"),
   openPath: (path: string) => ipcRenderer.invoke("openPath", path),
   addFolder: async () => await ipcRenderer.invoke("addFolder"),
+  scannedFile: async () => await ipcRenderer.invoke("scannedFile"),
 });

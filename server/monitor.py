@@ -3,13 +3,14 @@ import time
 import json
 import logging
 import threading
-from dotenv import load_dotenv
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 import virus_tot
 
 # Folders to monitor
 observed_folders = set([])
+scanned_files = []
+
 observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test1"))
 observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test2"))
 
@@ -17,27 +18,17 @@ observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stu
 logging.basicConfig(filename="IDS.log", level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
-
 class FolderScanner(FileSystemEventHandler):
 
   def __init__(self):
     self.scanner = virus_tot.VirusTotalScanner()
 
   def on_created(self, event: FileSystemEvent) -> None:
-    name = os.path.basename(event.src_path)
-
     if event.is_directory:
       self.scan_dir(event.src_path)
-
     else:
       logger.info(f"Created {event.src_path}")
-      # print(f"[+] Created {name}", flush=True)
-
-      # print(f"\n################{name}#####################", flush=True)
-      self.scanner.scan_file(event.src_path)
-      # print(f"#################################################\n", flush=True)
+      scanned_files.append(self.scanner.scan_file(event.src_path))
 
   def on_deleted(self, event: FileSystemEvent) -> None:
     logger.info(f"Deleted {event.src_path}")
@@ -46,19 +37,11 @@ class FolderScanner(FileSystemEventHandler):
   def scan_dir(self, path: str) -> None:
     try:
       with os.scandir(path) as entries:
-
         for entry in entries:
           if entry.is_file():
-            # print(f"[*] File: {entry.path}")
-
-            # print(f"\n################{entry.name}#####################")
-            self.scanner.scan_file(entry.path)
-            # print(f"#################################################\n")
-
+            scanned_files.append(self.scanner.scan_file(entry.path))
           elif entry.is_dir():
             self.scan_dir(entry.path)
-      # print(".END.")
-
     except (PermissionError, FileNotFoundError) as e:
       print(f"[!] Error scanning {path}: {e}")
 
@@ -67,9 +50,6 @@ class FolderScanner(FileSystemEventHandler):
       observed_folders.add(path)
       self.scan_dir(path)
       observer.schedule(self, path, recursive=True)
-
-      # print(f"[+] Now monitoring: {path}")
-
     else:
       print(f"[!] Path does not exist: {path}")
 
@@ -96,10 +76,13 @@ def user_input_loop(handler: FolderScanner, observer):
         handler.delete_folder(folder)
 
       elif command == "list":
-        print(json.dumps({"observed_folders": list(observed_folders)})+ ".END.",flush=True)
+        print(".LIST."+json.dumps({"observed_folders": list(observed_folders)})+ ".END.",flush=True)
 
       elif command == "help":
         print("Commands:\n  add <folder>\n  remove <folder>\n  list\n  help")
+      
+      elif command == "scan":
+        print(".SCAN_RESULTS."+json.dumps({"files": scanned_files})+".END.", flush=True)
 
       else:
         print("[!] Unknown command. Type 'help' for options.")

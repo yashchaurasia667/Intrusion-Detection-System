@@ -7,9 +7,11 @@ import {
 
 import "./App.css";
 
-import MainLayout from "./layouts/MainLayout";
 import FileResult from "./components/Scanner/FileResult";
 import ScannedFiles from "./components/Scanner/ScannedFiles";
+
+import MainLayout from "./layouts/MainLayout";
+import MainContextProvider from "./context/MainContextProvider";
 
 function App() {
   const router = createBrowserRouter(
@@ -18,7 +20,9 @@ function App() {
         path="/"
         element={
           <main className="h-[100vh] bg-[#121212]">
-            <MainLayout />
+            <MainContextProvider>
+              <MainLayout />
+            </MainContextProvider>
           </main>
         }
       >

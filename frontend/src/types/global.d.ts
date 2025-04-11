@@ -11,6 +11,7 @@ declare global {
       addFolder: () => Promise<OpenFolderRes | undefined>;
       list: () => Promise<string>;
       openPath: (path: string) => void;
+      scannedFile: () => Promise<string>;
     };
   }
 }

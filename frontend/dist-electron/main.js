@@ -40,14 +40,11 @@ app.on("activate", () => {
 });
 let python = null;
 function startPythonProcess() {
-  var _a, _b;
+  var _a;
   python = spawn("python", [path.join(__dirname, "../../server/monitor.py")], {
     stdio: ["pipe", "pipe", "pipe"]
   });
-  (_a = python.stdout) == null ? void 0 : _a.on("data", (data) => {
-    console.log("[PYTHON STDOUT]", data.toString());
-  });
-  (_b = python.stderr) == null ? void 0 : _b.on("data", (data) => {
+  (_a = python.stderr) == null ? void 0 : _a.on("data", (data) => {
     console.error("[PYTHON STDERR]", data.toString());
   });
   python.on("exit", (code) => {
@@ -55,6 +52,24 @@ function startPythonProcess() {
     python = null;
   });
 }
+ipcMain.handle("scannedFile", async () => {
+  var _a;
+  if (python && ((_a = python.stdin) == null ? void 0 : _a.writable)) python.stdin.write(`scan
+`);
+  return new Promise((resolve) => {
+    var _a2;
+    if (python) {
+      (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
+        const res = data.toString().trim();
+        if (res.startsWith(".SCAN_RESULTS.") && res.endsWith(".END.")) {
+          resolve(res.slice(14, -5));
+        }
+      });
+    } else {
+      resolve("Python process not running or stdout not readable.");
+    }
+  });
+});
 ipcMain.handle("list", async () => {
   var _a;
   if (python && ((_a = python.stdin) == null ? void 0 : _a.writable)) {
@@ -64,9 +79,10 @@ ipcMain.handle("list", async () => {
       var _a2;
       if (python)
         (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
-          const result = data.toString();
-          console.log(result);
-          resolve(result);
+          const result = data.toString().trim();
+          if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
+            resolve(result.slice(6, -5));
+          }
         });
     });
   } else {

@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo } from "react";
+
 import FolderTile from "./FolderTile";
+import MainContext from "../../context/MainContext";
 
 const MonitorList = () => {
-  const [folderList, setFolderList] = useState<string[]>([]);
+  const context = useContext(MainContext);
+  if (!context) throw new Error("No main context");
 
-  const list = async () => {
-    const res = await window.api.list();
-    const data = res.split(".END.");
-    setFolderList(JSON.parse(data[0]).observed_folders);
-    // console.log(JSON.parse(data[0]));
-  };
+  const { folderList, setFolderList } = context;
 
   useEffect(() => {
+    const list = async () => {
+      const res = await window.api.list();
+      const data = res.split(".END.");
+      setFolderList(JSON.parse(data[0]).observed_folders);
+      // console.log(JSON.parse(data[0]));
+    };
     list();
   }, []);
 
@@ -33,7 +37,9 @@ const MonitorList = () => {
       if (res && !res?.canceled) {
         const path = res.filePaths[0];
         console.log(`Added path: ${path}`);
-        setFolderList((prev) => [...prev, path]);
+        setFolderList(
+          folderList.includes(path) ? folderList : [path, ...folderList]
+        );
       } else console.log("Operation canceled");
     } catch (error) {
       console.error(`Something went wrong opening file dialog: ${error}`);
@@ -45,7 +51,6 @@ const MonitorList = () => {
       <p className="text-lg font-semibold px-2">Folders currently monitoring</p>
       <div className="flex flex-col items-center overflow-auto h-full mt-5 rounded-md">
         {folders}
-        {/* <FolderTile /> */}
       </div>
       <div>
         <button

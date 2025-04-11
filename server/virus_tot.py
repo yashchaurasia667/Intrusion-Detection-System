@@ -3,19 +3,21 @@ import json
 import hashlib
 import vt
 from dotenv import load_dotenv
+from monitor import scanned_files
 
 class VirusTotalScanner:
 
-  def __init__(self, env_path="server/.env"):
+  def __init__(self):
     # config = dotenv_values(env_path)
+    load_dotenv()
     self.API_KEY = os.getenv("VIRUS_TOTAL_API_KEY")
 
     if not self.API_KEY:
       raise ValueError("VIRUS_TOTAL_API_KEY not found in .env")
 
-  def __del__(self):
-    if hasattr(self, "client"):
-      self.client.close()
+  # def __del__(self):
+  #   if hasattr(self, "client"):
+  #     self.client.close()
 
   def get_file_hash(self, path: str) -> str:
     with open(path, "rb") as f:
@@ -31,21 +33,24 @@ class VirusTotalScanner:
       with vt.Client(apikey=self.API_KEY) as client:
         file_obj = client.get_object(f"/files/{file_hash}")
         file_json = json.dumps({
-          "file": file_obj.get("names", ["unnamed"])[0],
-          "sHA256:": file_obj.sha256,
-          "size:": file_obj.size,
-          "malicious_detections:": file_obj.last_analysis_stats["malicious"],
-          "suspicious_detections:": file_obj.last_analysis_stats["suspicious"],
+          "name": file_obj.get("names", ["unnamed"])[0],
+          "hash": file_obj.sha256,
+          "path": path,
+          "size": file_obj.size,
+          "score": file_obj.last_analysis_stats["malicious"],
+          # "suspicious_detections:": file_obj.last_analysis_stats["suspicious"],
           "vt_url": f"https://www.virustotal.com/gui/file/{file_obj.sha256}",
+          "total": file_obj.last_analysis_stats["malicious"] + file_obj.last_analysis_stats["undetected"]
         })
-        # print(file_json, flush=True)
+        return file_json
+        # print(".SCAN_RESULT."+file_json+".END.", flush=True)
 
     except vt.error.APIError as e:
       print(f"[!] File not found: {e}")
       self._prompt_upload(path)
 
     except Exception as e:
-      print(f"[!] Unexpected error: {e}")
+      print(f"[!] Unexpected error: ", e)
 
     # finally:
     #   self.client.close()

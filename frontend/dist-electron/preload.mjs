@@ -26,5 +26,6 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 electron.contextBridge.exposeInMainWorld("api", {
   list: async () => await electron.ipcRenderer.invoke("list"),
   openPath: (path) => electron.ipcRenderer.invoke("openPath", path),
-  addFolder: async () => await electron.ipcRenderer.invoke("addFolder")
+  addFolder: async () => await electron.ipcRenderer.invoke("addFolder"),
+  scannedFile: async () => await electron.ipcRenderer.invoke("scannedFile")
 });

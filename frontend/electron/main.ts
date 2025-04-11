@@ -77,9 +77,16 @@ function startPythonProcess() {
     stdio: ["pipe", "pipe", "pipe"],
   });
 
-  python.stdout?.on("data", (data) => {
-    console.log("[PYTHON STDOUT]", data.toString());
-  });
+  // python.stdout?.on("data", (data) => {
+  // const res = data.toString().trim();
+  // console.log(`[PYTHON OUTPU]: ${res}\n`);
+  // if (res.startsWith(".SCAN_RESULT.") && res.endsWith(".END.")) {
+  //   // resolve(res); // Send the result back to renderer
+  //   win?.webContents.send("scan-result", res);
+  // } else if (res.startsWith(".LIST.") && res.endsWith(".END.")) {
+  //   win?.webContents.send(res.slice(6, -6));
+  // }
+  // });
 
   python.stderr?.on("data", (data) => {
     console.error("[PYTHON STDERR]", data.toString());
@@ -91,6 +98,24 @@ function startPythonProcess() {
   });
 }
 
+ipcMain.handle("scannedFile", async () => {
+  if (python && python.stdin?.writable) python.stdin.write(`scan\n`);
+
+  return new Promise((resolve) => {
+    if (python) {
+      python.stdout?.once("data", (data) => {
+        const res = data.toString().trim();
+        if (res.startsWith(".SCAN_RESULTS.") && res.endsWith(".END.")) {
+          // console.log(res.slice(14, -5));
+          resolve(res.slice(14, -5));
+        }
+      });
+    } else {
+      resolve("Python process not running or stdout not readable.");
+    }
+  });
+});
+
 ipcMain.handle("list", async () => {
   if (python && python.stdin?.writable) {
     python.stdin.write(`list\n`);
@@ -98,9 +123,10 @@ ipcMain.handle("list", async () => {
     return new Promise((resolve) => {
       if (python)
         python.stdout?.once("data", (data) => {
-          const result = data.toString();
-          console.log(result);
-          resolve(result); // this sends it back to the renderer
+          const result = data.toString().trim();
+          if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
+            resolve(result.slice(6, -5));
+          }
         });
     });
   } else {
