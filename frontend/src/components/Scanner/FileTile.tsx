@@ -1,9 +1,44 @@
+import { useNavigate } from "react-router";
+import { useContext } from "react";
+
 import { IoMdOpen } from "react-icons/io";
+
+import MainContext from "../../context/MainContext";
 import { file } from "../../types";
 
-const FileTile = ({ name, path, hash, size, score, total, vt_url }: file) => {
+const FileTile = ({
+  name,
+  path,
+  hash,
+  size,
+  score,
+  suspicious,
+  total,
+  vt_url,
+}: file) => {
+  const context = useContext(MainContext);
+  if (!context) throw new Error("No main context");
+  const { setCurrentlySelectedFile } = context;
+
+  const navigate = useNavigate();
+
   return (
-    <div className="w-full p-4 bg-[#2f2f2f] text-white rounded-xl shadow-lg cursor-pointer hover:scale-[102%] transition-all flex justify-between items-center group mt-2">
+    <div
+      onClick={() => {
+        setCurrentlySelectedFile({
+          name: name,
+          path: path,
+          hash: hash,
+          size: size,
+          score: score,
+          suspicious: suspicious,
+          total: total,
+          vt_url: vt_url,
+        });
+        navigate("/file");
+      }}
+      className="w-full p-4 bg-[#2f2f2f] text-white rounded-xl shadow-lg cursor-pointer hover:scale-[102%] transition-all flex justify-between items-center group mt-2"
+    >
       <div>
         <h2 className="text-lg font-bold text-blue-400 group-hover:underline">
           {name}

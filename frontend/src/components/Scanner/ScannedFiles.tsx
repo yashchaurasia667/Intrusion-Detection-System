@@ -1,16 +1,12 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo } from "react";
 
 import FileTile from "./FileTile";
 import MainContext from "../../context/MainContext";
 
-import { file } from "../../types";
-
 const ScannedFiles = () => {
   const context = useContext(MainContext);
   if (!context) throw new Error("no main context");
-  const { folderList } = context;
-
-  const [scannedFiles, setScannedFiles] = useState<file[]>([]);
+  const { scannedFiles, setScannedFiles, folderList } = context;
 
   useEffect(() => {
     const scan = async () => {

@@ -12,6 +12,7 @@ export interface file {
   path: string;
   size: number;
   score: number;
+  suspicious: number;
   total: number;
   vt_url: string;
 }

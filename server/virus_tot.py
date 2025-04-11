@@ -38,7 +38,7 @@ class VirusTotalScanner:
           "path": path,
           "size": file_obj.size,
           "score": file_obj.last_analysis_stats["malicious"],
-          # "suspicious_detections:": file_obj.last_analysis_stats["suspicious"],
+          "suspicious": file_obj.last_analysis_stats["suspicious"],
           "vt_url": f"https://www.virustotal.com/gui/file/{file_obj.sha256}",
           "total": file_obj.last_analysis_stats["malicious"] + file_obj.last_analysis_stats["undetected"]
         })
