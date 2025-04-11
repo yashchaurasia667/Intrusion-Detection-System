@@ -81,6 +81,7 @@ ipcMain.handle("list", async () => {
         (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
+            console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });

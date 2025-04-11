@@ -125,6 +125,7 @@ ipcMain.handle("list", async () => {
         python.stdout?.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
+            console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });
