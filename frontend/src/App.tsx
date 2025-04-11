@@ -22,12 +22,8 @@ function App() {
           </main>
         }
       >
-        <Route path="/">
-          <ScannedFiles />
-        </Route>
-        <Route path="/file">
-          <FileResult />
-        </Route>
+        <Route path="/" element={<ScannedFiles />} />
+        <Route path="/file" element={<FileResult />} />
       </Route>
     )
   );

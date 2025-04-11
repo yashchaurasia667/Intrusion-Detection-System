@@ -1,11 +1,17 @@
 interface props {
-  filename?: string;
-  filepath?: string;
-  size?: string;
-  score?: number;
-  total?: number;
+  filename: string;
+  filepath: string;
+  size: string;
+  score: number;
+  total: number;
 }
-const FileResult = ({ filename, filepath, size, score, total }: props) => {
+const FileResult = ({
+  filename = "file",
+  filepath = "C:/Users/test/Downloads/file",
+  size = 35,
+  score = 50,
+  total = 66,
+}: props) => {
   const progress = (score / total) * 100;
   return (
     <div className="bg-[#1f1f1f] w-full px-4 rounded-lg mx-2">
