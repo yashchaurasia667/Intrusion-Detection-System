@@ -1,13 +1,38 @@
-import Scanner from "./components/Scanner/";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 
 import "./App.css";
 
+import MainLayout from "./layouts/MainLayout";
+import FileResult from "./components/Scanner/FileResult";
+import ScannedFiles from "./components/Scanner/ScannedFiles";
+
 function App() {
-  return (
-    <main className="h-[100vh] bg-[#121212]">
-      <Scanner />
-    </main>
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route
+        path="/"
+        element={
+          <main className="h-[100vh] bg-[#121212]">
+            <MainLayout />
+          </main>
+        }
+      >
+        <Route path="/">
+          <ScannedFiles />
+        </Route>
+        <Route path="/file">
+          <FileResult />
+        </Route>
+      </Route>
+    )
   );
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;

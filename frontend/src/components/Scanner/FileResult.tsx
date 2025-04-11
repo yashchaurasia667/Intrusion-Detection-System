@@ -1,14 +1,15 @@
 interface props {
-  filename: string;
-  filepath: string;
-  size: string;
-  score: number;
-  total: number;
+  filename?: string;
+  filepath?: string;
+  size?: string;
+  score?: number;
+  total?: number;
 }
 const FileResult = ({ filename, filepath, size, score, total }: props) => {
   const progress = (score / total) * 100;
   return (
     <div className="bg-[#1f1f1f] w-full px-4 rounded-lg mx-2">
+      {/* <FileTile /> */}
       <div className="mt-4">
         <p className="text-2xl font-semibold inline">Scan Results for </p>{" "}
         <p className="text-2xl font-semibold inline text-[#5cc8ff]">
