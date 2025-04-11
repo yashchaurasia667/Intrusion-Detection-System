@@ -7,28 +7,8 @@ interface props {
 }
 const FileResult = ({ filename, filepath, size, score, total }: props) => {
   const progress = (score / total) * 100;
-  // const [value, setValue] = useState("");
-  // const [response, setResponse] = useState("");
-
-  // async function sendMessage() {
-  //   const res = await invoke("send_to_python", { input: value });
-  //   setResponse((prev) => (prev += res+ "\n"));
-  // }
-
   return (
     <div className="bg-[#1f1f1f] w-full px-4 rounded-lg mx-2">
-      {/* <input
-        type="text"
-        placeholder="talk to python"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-      <div>
-        response
-        {response}
-      </div>
-      <button onClick={sendMessage}>run</button> */}
-
       <div className="mt-4">
         <p className="text-2xl font-semibold inline">Scan Results for </p>{" "}
         <p className="text-2xl font-semibold inline text-[#5cc8ff]">

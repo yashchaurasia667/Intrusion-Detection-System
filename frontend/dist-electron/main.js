@@ -1,7 +1,8 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path from "path";
+import { spawn } from "node:child_process";
 createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
@@ -37,13 +38,60 @@ app.on("activate", () => {
     createWindow();
   }
 });
+let python = null;
+function startPythonProcess() {
+  var _a, _b;
+  python = spawn("python", [path.join(__dirname, "../../server/monitor.py")], {
+    stdio: ["pipe", "pipe", "pipe"]
+  });
+  (_a = python.stdout) == null ? void 0 : _a.on("data", (data) => {
+    console.log("[PYTHON STDOUT]", data.toString());
+  });
+  (_b = python.stderr) == null ? void 0 : _b.on("data", (data) => {
+    console.error("[PYTHON STDERR]", data.toString());
+  });
+  python.on("exit", (code) => {
+    console.warn(`[Python exited with code ${code}]`);
+    python = null;
+  });
+}
+ipcMain.handle("list", async () => {
+  var _a;
+  if (python && ((_a = python.stdin) == null ? void 0 : _a.writable)) {
+    python.stdin.write(`list
+`);
+    return new Promise((resolve) => {
+      var _a2;
+      if (python)
+        (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
+          const result = data.toString();
+          console.log(result);
+          resolve(result);
+        });
+    });
+  } else {
+    return "Python process not ready";
+  }
+});
 ipcMain.handle("addFolder", async () => {
+  var _a;
   const result = await dialog.showOpenDialog({
     properties: ["openDirectory", "createDirectory"]
   });
+  if (python && ((_a = python.stdin) == null ? void 0 : _a.writable)) {
+    python.stdin.write(`add ${result.filePaths[0]}
+`);
+  }
   return result;
 });
-app.whenReady().then(createWindow);
+ipcMain.handle("openPath", async (e, path2) => {
+  e.preventDefault();
+  shell.showItemInFolder(path2);
+});
+app.whenReady().then(() => {
+  createWindow();
+  startPythonProcess();
+});
 export {
   MAIN_DIST,
   RENDERER_DIST,

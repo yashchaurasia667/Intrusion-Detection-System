@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path from "path";
 
 import { dialog } from "electron";
+import { spawn } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,11 +70,60 @@ app.on("activate", () => {
   }
 });
 
+let python: ReturnType<typeof spawn> | null = null;
+
+function startPythonProcess() {
+  python = spawn("python", [path.join(__dirname, "../../server/monitor.py")], {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+
+  python.stdout?.on("data", (data) => {
+    console.log("[PYTHON STDOUT]", data.toString());
+  });
+
+  python.stderr?.on("data", (data) => {
+    console.error("[PYTHON STDERR]", data.toString());
+  });
+
+  python.on("exit", (code) => {
+    console.warn(`[Python exited with code ${code}]`);
+    python = null;
+  });
+}
+
+ipcMain.handle("list", async () => {
+  if (python && python.stdin?.writable) {
+    python.stdin.write(`list\n`);
+
+    return new Promise((resolve) => {
+      if (python)
+        python.stdout?.once("data", (data) => {
+          const result = data.toString();
+          console.log(result);
+          resolve(result); // this sends it back to the renderer
+        });
+    });
+  } else {
+    return "Python process not ready";
+  }
+});
+
 ipcMain.handle("addFolder", async () => {
   const result = await dialog.showOpenDialog({
     properties: ["openDirectory", "createDirectory"],
   });
+  if (python && python.stdin?.writable) {
+    python.stdin.write(`add ${result.filePaths[0]}\n`);
+  }
   return result;
 });
 
-app.whenReady().then(createWindow);
+ipcMain.handle("openPath", async (e, path: string) => {
+  e.preventDefault();
+  shell.showItemInFolder(path);
+});
+
+app.whenReady().then(() => {
+  createWindow();
+  startPythonProcess();
+});

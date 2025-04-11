@@ -10,8 +10,8 @@ import virus_tot
 
 # Folders to monitor
 observed_folders = set([])
-# observed_folders.add(os.path.join(os.getcwd(), "server/test1"))
-# observed_folders.add(os.path.join(os.getcwd(), "server/test2"))
+observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test1"))
+observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test2"))
 
 # Logging setup
 logging.basicConfig(filename="IDS.log", level=logging.INFO, format="%(asctime)s - %(message)s")
@@ -33,11 +33,11 @@ class FolderScanner(FileSystemEventHandler):
 
     else:
       logger.info(f"Created {event.src_path}")
-      print(f"[+] Created {name}", flush=True)
+      # print(f"[+] Created {name}", flush=True)
 
-      print(f"\n################{name}#####################", flush=True)
+      # print(f"\n################{name}#####################", flush=True)
       self.scanner.scan_file(event.src_path)
-      print(f"#################################################\n", flush=True)
+      # print(f"#################################################\n", flush=True)
 
   def on_deleted(self, event: FileSystemEvent) -> None:
     logger.info(f"Deleted {event.src_path}")
@@ -49,14 +49,15 @@ class FolderScanner(FileSystemEventHandler):
 
         for entry in entries:
           if entry.is_file():
-            print(f"[*] File: {entry.path}")
+            # print(f"[*] File: {entry.path}")
 
-            print(f"\n################{entry.name}#####################")
+            # print(f"\n################{entry.name}#####################")
             self.scanner.scan_file(entry.path)
-            print(f"#################################################\n")
+            # print(f"#################################################\n")
 
           elif entry.is_dir():
             self.scan_dir(entry.path)
+      # print(".END.")
 
     except (PermissionError, FileNotFoundError) as e:
       print(f"[!] Error scanning {path}: {e}")
@@ -67,7 +68,7 @@ class FolderScanner(FileSystemEventHandler):
       self.scan_dir(path)
       observer.schedule(self, path, recursive=True)
 
-      print(f"[+] Now monitoring: {path}")
+      # print(f"[+] Now monitoring: {path}")
 
     else:
       print(f"[!] Path does not exist: {path}")
@@ -84,7 +85,7 @@ class FolderScanner(FileSystemEventHandler):
 def user_input_loop(handler: FolderScanner, observer):
   while True:
     try:
-      command = input(">> ").strip()
+      command = input().strip()
 
       if command.startswith("add "):
         folder = command[4:].strip()
@@ -95,10 +96,7 @@ def user_input_loop(handler: FolderScanner, observer):
         handler.delete_folder(folder)
 
       elif command == "list":
-        print("[*] Currently monitored folders:")
-        for f in observed_folders:
-          print(f"- {f}")
-          json.dumps({"observed_folders", observed_folders})
+        print(json.dumps({"observed_folders": list(observed_folders)})+ ".END.",flush=True)
 
       elif command == "help":
         print("Commands:\n  add <folder>\n  remove <folder>\n  list\n  help")
@@ -124,7 +122,7 @@ def main():
 
   observer.start()
   logger.info("Started Monitoring...")
-  print("[*] Monitoring started. Type 'help' for commands.", flush=True)
+  # print("[*] Monitoring started. Type 'help' for commands.", flush=True)
 
   # Start input thread
   threading.Thread(target=user_input_loop, args=(handler, observer), daemon=True).start()
@@ -132,7 +130,7 @@ def main():
   # Keep main thread alive
   try:
     while True:
-      print("heartbeat", flush=True)
+      # print("heartbeat", flush=True)
       time.sleep(10)
   except KeyboardInterrupt:
     print("[!] KeyboardInterrupt received. Stopping...", flush=True)

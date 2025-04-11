@@ -26,5 +26,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 });
 
 contextBridge.exposeInMainWorld("api", {
-  addFolder: () => ipcRenderer.invoke("addFolder"),
+  list: async () => await ipcRenderer.invoke("list"),
+  openPath: (path: string) => ipcRenderer.invoke("openPath", path),
+  addFolder: async () => await ipcRenderer.invoke("addFolder"),
 });

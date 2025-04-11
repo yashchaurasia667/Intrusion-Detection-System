@@ -9,7 +9,8 @@ declare global {
   interface Window {
     api: {
       addFolder: () => Promise<OpenFolderRes | undefined>;
-      // openPath: (path: string) => void;
+      list: () => Promise<string>;
+      openPath: (path: string) => void;
     };
   }
 }
