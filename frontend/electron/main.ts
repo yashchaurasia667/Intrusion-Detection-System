@@ -34,6 +34,7 @@ let win: BrowserWindow | null;
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
@@ -43,8 +44,6 @@ function createWindow() {
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
-
-  win.setMenu(null);
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -79,16 +78,16 @@ function startPythonProcess() {
     stdio: ["pipe", "pipe", "pipe"],
   });
 
-  // python.stdout?.on("data", (data) => {
-  // const res = data.toString().trim();
-  // console.log(`[PYTHON OUTPU]: ${res}\n`);
-  // if (res.startsWith(".SCAN_RESULT.") && res.endsWith(".END.")) {
-  //   // resolve(res); // Send the result back to renderer
-  //   win?.webContents.send("scan-result", res);
-  // } else if (res.startsWith(".LIST.") && res.endsWith(".END.")) {
-  //   win?.webContents.send(res.slice(6, -6));
-  // }
-  // });
+  python.stdout?.on("data", (data) => {
+    const res = data.toString().trim();
+    console.log(`[PYTHON STDOUT]: ${res}\n`);
+    // if (res.startsWith(".SCAN_RESULT.") && res.endsWith(".END.")) {
+    //   // resolve(res); // Send the result back to renderer
+    //   win?.webContents.send("scan-result", res);
+    // } else if (res.startsWith(".LIST.") && res.endsWith(".END.")) {
+    //   win?.webContents.send(res.slice(6, -6));
+    // }
+  });
 
   python.stderr?.on("data", (data) => {
     console.error("[PYTHON STDERR]", data.toString());
@@ -127,7 +126,7 @@ ipcMain.handle("list", async () => {
         python.stdout?.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
-            console.log(result.slice(6, -5));
+            // console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });

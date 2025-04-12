@@ -15,7 +15,7 @@ const ScannedFiles = () => {
       const res = await window.api.scannedFile();
       const data = JSON.parse(res).files;
       const jsonData = data.map((file: string) => JSON.parse(file));
-      setScannedFiles([...scannedFiles, ...jsonData]);
+      setScannedFiles([...jsonData]);
     };
     if (folderList.length) scan();
   }, [folderList.length]);

@@ -22,6 +22,10 @@ const FileTile = ({
 
   const navigate = useNavigate();
 
+  // const openInFolder = async () => {
+  //   window.api.openPath(path);
+  // };
+
   return (
     <div
       onClick={() => {
@@ -46,7 +50,7 @@ const FileTile = ({
         <p className="text-sm text-gray-400">{path}</p>
       </div>
       <div className="flex gap-x-4 items-center">
-        <span className="text-sm ">
+        <span onClick={() => window.api.openPath(path)} className="text-sm ">
           <IoMdOpen size={25} className="hover:fill-[#0672c9]" />
         </span>
         <span className="text-sm bg-red-500 px-2 py-1 rounded-full">

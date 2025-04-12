@@ -14,6 +14,7 @@ let win;
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs")
     }
@@ -21,7 +22,6 @@ function createWindow() {
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
-  win.setMenu(null);
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
@@ -41,11 +41,16 @@ app.on("activate", () => {
 });
 let python = null;
 function startPythonProcess() {
-  var _a;
+  var _a, _b;
   python = spawn("python", [path.join(__dirname, "../../server/monitor.py")], {
     stdio: ["pipe", "pipe", "pipe"]
   });
-  (_a = python.stderr) == null ? void 0 : _a.on("data", (data) => {
+  (_a = python.stdout) == null ? void 0 : _a.on("data", (data) => {
+    const res = data.toString().trim();
+    console.log(`[PYTHON STDOUT]: ${res}
+`);
+  });
+  (_b = python.stderr) == null ? void 0 : _b.on("data", (data) => {
     console.error("[PYTHON STDERR]", data.toString());
   });
   python.on("exit", (code) => {
@@ -82,7 +87,6 @@ ipcMain.handle("list", async () => {
         (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
-            console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });

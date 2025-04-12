@@ -10,6 +10,13 @@ import virus_tot
 # Folders to monitor
 observed_folders = set([])
 scanned_files = []
+EXT_TO_IGNORE = ( ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp", ".gif",
+                  ".heic", ".heif", ".raw", ".cr2", ".cr3", ".nef", ".nrw", ".arw",
+                  ".rw2", ".orf", ".dng", ".sr2", ".pef", ".raf", ".ico", ".svg",
+                  ".mp4", ".m4v", ".mkv", ".webm", ".mov", ".avi", ".wmv", ".flv",
+                  ".mpeg", ".mpg", ".3gp", ".3g2", ".mts", ".m2ts", ".ts", ".vob",
+                  ".ogv", ".rm", ".rmvb", ".divx", ".f4v", ".asf"
+                )
 
 observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test1"))
 observed_folders.add(os.path.join(os.getcwd(), "C:\\Users\\yashc\\Documents\\Stuff\\Intrusion-detection-system\\server\\test2"))
@@ -24,11 +31,13 @@ class FolderScanner(FileSystemEventHandler):
     self.scanner = virus_tot.VirusTotalScanner()
 
   def on_created(self, event: FileSystemEvent) -> None:
+    name = os.path.basename(event.src_path)
     if event.is_directory:
       self.scan_dir(event.src_path)
     else:
       logger.info(f"Created {event.src_path}")
-      scanned_files.append(self.scanner.scan_file(event.src_path))
+      if name.split(".")[-1] not in EXT_TO_IGNORE:
+        scanned_files.append(self.scanner.scan_file(event.src_path))
 
   def on_deleted(self, event: FileSystemEvent) -> None:
     logger.info(f"Deleted {event.src_path}")
@@ -39,7 +48,8 @@ class FolderScanner(FileSystemEventHandler):
       with os.scandir(path) as entries:
         for entry in entries:
           if entry.is_file():
-            scanned_files.append(self.scanner.scan_file(entry.path))
+            if entry.name.split(".")[-1] not in EXT_TO_IGNORE:
+              scanned_files.append(self.scanner.scan_file(entry.path))
           elif entry.is_dir():
             self.scan_dir(entry.path)
     except (PermissionError, FileNotFoundError) as e:
@@ -105,7 +115,6 @@ def main():
 
   observer.start()
   logger.info("Started Monitoring...")
-  # print("[*] Monitoring started. Type 'help' for commands.", flush=True)
 
   # Start input thread
   threading.Thread(target=user_input_loop, args=(handler, observer), daemon=True).start()
@@ -114,7 +123,7 @@ def main():
   try:
     while True:
       # print("heartbeat", flush=True)
-      time.sleep(10)
+      time.sleep(60)
   except KeyboardInterrupt:
     print("[!] KeyboardInterrupt received. Stopping...", flush=True)
   finally:

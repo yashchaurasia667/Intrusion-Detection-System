@@ -3,7 +3,6 @@ import json
 import hashlib
 import vt
 from dotenv import load_dotenv
-from monitor import scanned_files
 
 class VirusTotalScanner:
 
@@ -47,7 +46,7 @@ class VirusTotalScanner:
 
     except vt.error.APIError as e:
       print(f"[!] File not found: {e}")
-      self._prompt_upload(path)
+      return self._prompt_upload(path)
 
     except Exception as e:
       print(f"[!] Unexpected error: ", e)
@@ -56,24 +55,35 @@ class VirusTotalScanner:
     #   self.client.close()
 
   def _prompt_upload(self, path: str):
-    confirm = input(f"File not found. Upload to VirusTotal? [y/N]: ").strip().lower()
-    if confirm == "y":
+    # confirm = input(f"File not found. Upload to VirusTotal? [y/N]: ").strip().lower()
+    # if confirm == "y":
       with open(path, "rb") as f:
         with vt.Client(apikey=self.API_KEY) as client:
           analysis = client.scan_file(f, wait_for_completion=True)
           file_hash = analysis.meta["file_info"]["sha256"]
           file_obj = self.client.get_object(f"/files/{file_hash}")
 
-          print()
-          print(f"Uploaded and scanned: {file_obj.sha256}")
-          print(f"Malicious: {file_obj.last_analysis_stats['malicious']}")
-          print(f"VT Link: https://www.virustotal.com/gui/file/{file_hash}")
-    else:
-      print("Upload cancelled.")
+          # print()
+          # print(f"Uploaded and scanned: {file_obj.sha256}")
+          # print(f"Malicious: {file_obj.last_analysis_stats['malicious']}")
+          file_json = json.dumps({
+            "name": file_obj.get("names", ["unnamed"])[0],
+            "hash": file_obj.sha256,
+            "path": path,
+            "size": file_obj.size,
+            "score": file_obj.last_analysis_stats["malicious"],
+            "suspicious": file_obj.last_analysis_stats["suspicious"],
+            "vt_url": f"https://www.virustotal.com/gui/file/{file_obj.sha256}",
+            "total": file_obj.last_analysis_stats["malicious"] + file_obj.last_analysis_stats["undetected"]
+          })
+          return file_json
+          # print(f"VT Link: https://www.virustotal.com/gui/file/{file_hash}")
+    # else:
+    #   print("Upload cancelled.")
 
 
 if __name__ == "__main__":
-  path = os.path.join("C:\\Users\\yashc\\Documents\\Stuff\\CTFs\\THM\\rootme\\payload.php.;")
+  path = os.path.abspath("C:\\Users\\yashc\\Documents\\Stuff\\CTFs\\THM\\rootme\\payload.php.;")
   size = os.path.getsize(path) / pow(1024, 2)
   print(f"path: {path}, size: {size}")
 
