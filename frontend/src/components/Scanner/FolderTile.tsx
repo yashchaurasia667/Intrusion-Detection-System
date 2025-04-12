@@ -13,7 +13,7 @@ interface props {
 const FolderTile = ({ path, name }: props) => {
   const context = useContext(MainContext);
   if (!context) throw new Error("No main context");
-  const { list } = context;
+  const { setFolderList, folderList } = context;
 
   const openPath = async () => {
     window.api.openPath(path);
@@ -32,7 +32,7 @@ const FolderTile = ({ path, name }: props) => {
       theme: "dark",
       transition: Bounce,
     });
-    list();
+    setFolderList(folderList.filter((folder) => folder == path));
   };
 
   return (

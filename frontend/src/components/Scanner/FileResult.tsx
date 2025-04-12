@@ -60,7 +60,7 @@ const FileResult = () => {
         </div>
         <div className="h-[18px] bg-[#3a3a3a] rounded-full overflow-hidden border border-[#4b4b4b]">
           <div
-            className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-500 ease-in-out"
+            className="h-full bg-gradient-to-r from-green-400 to-red-800 rounded-full transition-all duration-500 ease-in-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
