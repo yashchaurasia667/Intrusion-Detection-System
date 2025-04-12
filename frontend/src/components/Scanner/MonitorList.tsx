@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo } from "react";
 
 import FolderTile from "./FolderTile";
 import MainContext from "../../context/MainContext";
+import { Bounce, toast } from "react-toastify";
 
 const MonitorList = () => {
   const context = useContext(MainContext);
@@ -34,6 +35,17 @@ const MonitorList = () => {
         setFolderList(
           folderList.includes(path) ? folderList : [path, ...folderList]
         );
+        toast.success("Folder Added", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
       } else console.log("Operation canceled");
     } catch (error) {
       console.error(`Something went wrong opening file dialog: ${error}`);

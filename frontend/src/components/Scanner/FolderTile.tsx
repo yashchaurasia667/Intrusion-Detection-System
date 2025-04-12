@@ -3,6 +3,7 @@ import { FaFolder } from "react-icons/fa6";
 import { IoMdRemoveCircle } from "react-icons/io";
 import { IoMdOpen } from "react-icons/io";
 import MainContext from "../../context/MainContext";
+import { toast, Bounce } from "react-toastify";
 
 interface props {
   path: string;
@@ -20,6 +21,17 @@ const FolderTile = ({ path, name }: props) => {
 
   const removeFolder = async () => {
     window.api.removeFolder(path);
+    toast.success("Folder Removed", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
     list();
   };
 
