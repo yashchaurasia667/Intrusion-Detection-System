@@ -126,7 +126,7 @@ ipcMain.handle("list", async () => {
         python.stdout?.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
-            // console.log(result.slice(6, -5));
+            console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });
@@ -149,6 +149,13 @@ ipcMain.handle("addFolder", async () => {
 ipcMain.handle("openPath", async (e, path: string) => {
   e.preventDefault();
   shell.showItemInFolder(path);
+});
+
+ipcMain.handle("removeFolder", async (e, path: string) => {
+  e.preventDefault();
+  if (python && python.stdin?.writable) {
+    python.stdin.write(`remove ${path}`);
+  }
 });
 
 app.whenReady().then(() => {

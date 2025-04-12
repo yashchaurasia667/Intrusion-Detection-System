@@ -87,6 +87,7 @@ ipcMain.handle("list", async () => {
         (_a2 = python.stdout) == null ? void 0 : _a2.once("data", (data) => {
           const result = data.toString().trim();
           if (result.startsWith(".LIST.") && result.endsWith(".END.")) {
+            console.log(result.slice(6, -5));
             resolve(result.slice(6, -5));
           }
         });
@@ -109,6 +110,13 @@ ipcMain.handle("addFolder", async () => {
 ipcMain.handle("openPath", async (e, path2) => {
   e.preventDefault();
   shell.showItemInFolder(path2);
+});
+ipcMain.handle("removeFolder", async (e, path2) => {
+  var _a;
+  e.preventDefault();
+  if (python && ((_a = python.stdin) == null ? void 0 : _a.writable)) {
+    python.stdin.write(`remove ${path2}`);
+  }
 });
 app.whenReady().then(() => {
   createWindow();

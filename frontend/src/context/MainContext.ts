@@ -8,6 +8,7 @@ interface MainContext {
   setCurrentlySelectedFile: (e: file) => void;
   scannedFiles: file[];
   setScannedFiles: (e: file[]) => void;
+  list: ()=> void;
 }
 
 const MainContext = React.createContext(<MainContext | undefined>undefined);

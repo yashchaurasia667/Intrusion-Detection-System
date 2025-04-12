@@ -22,7 +22,12 @@ const MainContextProvider: React.FC<MaincontextProviderProps> = ({
     suspicious: 0,
     total: 0,
   });
-
+  const list = async () => {
+    const res = await window.api.list();
+    const data = res.split(".END.");
+    setFolderList(JSON.parse(data[0]).observed_folders);
+    // console.log(JSON.parse(data[0]));
+  };
   const value = {
     scannedFiles,
     setScannedFiles,
@@ -30,6 +35,7 @@ const MainContextProvider: React.FC<MaincontextProviderProps> = ({
     setFolderList,
     currentlySelectedFile,
     setCurrentlySelectedFile,
+    list,
   };
   return <MainContext.Provider value={value}>{children}</MainContext.Provider>;
 };

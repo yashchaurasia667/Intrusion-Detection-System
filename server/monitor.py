@@ -82,7 +82,8 @@ def user_input_loop(handler: FolderScanner, observer):
         handler.add_folder(folder, observer)
 
       elif command.startswith("remove "):
-        folder = command[7:].strip()
+        folder = command[7:-4].strip()
+        print(folder, flush=True)
         handler.delete_folder(folder)
 
       elif command == "list":

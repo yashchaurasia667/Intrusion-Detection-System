@@ -7,15 +7,9 @@ const MonitorList = () => {
   const context = useContext(MainContext);
   if (!context) throw new Error("No main context");
 
-  const { folderList, setFolderList } = context;
+  const { folderList, setFolderList, list } = context;
 
   useEffect(() => {
-    const list = async () => {
-      const res = await window.api.list();
-      const data = res.split(".END.");
-      setFolderList(JSON.parse(data[0]).observed_folders);
-      // console.log(JSON.parse(data[0]));
-    };
     list();
   }, []);
 

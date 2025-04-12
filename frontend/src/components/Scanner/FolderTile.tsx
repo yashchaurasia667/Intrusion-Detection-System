@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { FaFolder } from "react-icons/fa6";
 import { IoMdRemoveCircle } from "react-icons/io";
 import { IoMdOpen } from "react-icons/io";
+import MainContext from "../../context/MainContext";
 
 interface props {
   path: string;
@@ -8,8 +10,17 @@ interface props {
 }
 
 const FolderTile = ({ path, name }: props) => {
+  const context = useContext(MainContext);
+  if (!context) throw new Error("No main context");
+  const { list } = context;
+
   const openPath = async () => {
     window.api.openPath(path);
+  };
+
+  const removeFolder = async () => {
+    window.api.removeFolder(path);
+    list();
   };
 
   return (
@@ -22,7 +33,7 @@ const FolderTile = ({ path, name }: props) => {
         <button onClick={openPath}>
           <IoMdOpen size={20} className="hover:fill-[#0672c9]" />
         </button>
-        <button className="px-2 ">
+        <button onClick={removeFolder} className="px-2 ">
           <IoMdRemoveCircle size={20} className="hover:fill-red-500" />
         </button>
       </div>
