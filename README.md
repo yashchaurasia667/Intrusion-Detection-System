@@ -14,4 +14,4 @@
 
 ## Screenshots
 
-![Screenshot](https://imgur.com/a/nkAzjL0)
+![Screenshot](https://i.imgur.com/sty5AQa.png)
